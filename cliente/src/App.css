@@ -8,6 +8,13 @@
     border-radius: 20px;
 }
 
+.info-error-container {
+    background-color: #da2558;
+    padding: 1rem;
+    border-radius: 20px;
+    height: 100%;
+}
+
 .info-card-container {
     display: flex;
     align-content: space-around;
@@ -22,9 +29,10 @@
 
 .submit-btn {
     background-color: darkgoldenrod;
-    border-color: bisque;
+    border: none;
     border-radius: 5px;
     color: white;
+    padding: 5px 30px;
 }
 
 .submit-align {
@@ -49,4 +57,14 @@
 .available-atms {
     font-weight: 600;
     font-size: 1.5rem
+}
+
+.unavailable-atm {
+    font-weight: 600;
+    font-size: 1.3rem
+}
+
+.error-msg {
+    font-weight: 400;
+    color: rgb(255, 38, 38);
 }

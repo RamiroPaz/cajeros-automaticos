@@ -12,10 +12,15 @@ function App() {
   const [map, showMap] = useState(false)
   const [atm, setAtm] = useState({})
   const [atmsWereFound, setAtmsWereFound] = useState(false)
+  const [noAtmsWereFound, setNoAtmsWereFound] = useState(false)
   const [currentNetwork, setNetwork] = useState(null)
   const [networkOptions, setNetworkOptions] = useState(null)
   const [currentLatitude, setLatitude] = useState(null)
   const [currentLongitude, setLongitude] = useState(null)
+  const [invalidLatitude, setInvalidLatitude] = useState(false)
+  const [invalidLongitude, setInvalidLongitude] = useState(false)
+  const [invalidNet, setInvalidNet] = useState(false)
+
 
   useEffect( () => {
     axios.get('http://localhost:5000/api/cajeros/redes')
@@ -62,11 +67,23 @@ function App() {
       event.preventDefault()
     }
 
-    if(!currentLatitude || !currentLongitude || !currentNetwork){
-      console.log(currentLatitude)
-      console.log(currentLongitude)
-      console.log(currentNetwork)
+    console.log('latitud' + currentLatitude)
+    console.log('long' + currentLongitude)
+
+
+    if(currentLatitude == null || currentLatitude == '-'){
+      setInvalidLatitude(true)
+      setLatitude(0)
       console.log('invalid input')
+      return false
+    }
+    if(currentLongitude == null || currentLongitude == '-'){
+      setInvalidLongitude(true)
+      setLongitude(0)
+      return false
+    }
+    if(!currentNetwork){
+      setInvalidNet(true)
       return false
     }
 
@@ -78,7 +95,11 @@ function App() {
         setAtm(res.data.response)
         showMap(true)
         if(res.data.response.length > 0) {
+          setNoAtmsWereFound(false)
           setAtmsWereFound(true)
+        }else {
+          setAtmsWereFound(false)
+          setNoAtmsWereFound(true)
         }
       }).catch(err => {
         console.log(err)
@@ -92,27 +113,46 @@ function App() {
 
   const handleLatitude = (event) => {
     const input = event.target.value
-    if(input == '-') {return} 
-    if(isNaN(input)){
+    if(input == '') {
+      setLatitude(0)
+      setInvalidLatitude(true)
+      return
+    }
+    else if(input == '-') {
+      setLatitude(null)
+      return
+    } 
+    else if(isNaN(input)){
       event.target.value = currentLatitude
       return
     }else if(!isValidCoord(input)){
       event.target.value = currentLatitude
       return
     }
+    setInvalidLatitude(false)
     setLatitude(Number(input))
   }
 
   const handleLongitude = (event) => {
     const input = event.target.value
-    if(input == '-') {return} 
-    if(isNaN(input)){
+    console.log(input)
+    if(input == '') {
+      setLongitude(0)
+      setInvalidLongitude(true)
+      return
+    }
+    if(input == '-') {
+      setLongitude(null)
+      return
+    } 
+    else if(isNaN(input)){
       event.target.value = currentLongitude
       return
     }else if(!isValidCoord(input)){
       event.target.value = currentLongitude
       return
     }
+    setInvalidLongitude(false)
     setLongitude(Number(input))
   }
 
@@ -120,8 +160,10 @@ function App() {
     const input = event.target.value
     if(!input || input === ''){
       console.log('invalid network')
+      invalidNet(true)
       return
     }
+    setInvalidNet(false)
     setNetwork(input)
   }
 
@@ -144,11 +186,18 @@ function App() {
                   Latitud
                 </label>
               </Row>
-              <input type="textbox"
-                step="any"
-                id="latitude"
-                onChange={handleLatitude}
-                placeholder="Ingrese su latitud" />
+              
+                <input type="textbox"
+                  step="any"
+                  id="latitude"
+                  onChange={handleLatitude}
+                  placeholder="Ingrese su latitud" />
+              
+              {invalidLatitude &&
+              <div className='error-msg'>
+                Latitud Invalida
+              </div>
+              }
             </Col>
             <Col>
               <Row>
@@ -156,11 +205,18 @@ function App() {
                   Longitud
                 </label>
               </Row>
-              <input type="textbox"
-                step="0.1"
-                id="longitude"
-                onChange={handleLongitude}
-                placeholder="Ingrese su longitud" />
+              
+                <input type="textbox"
+                  step="0.1"
+                  id="longitude"
+                  onChange={handleLongitude}
+                  placeholder="Ingrese su longitud" />
+              
+              {invalidLongitude &&
+              <div className='error-msg'>
+                Longitud Invalida
+              </div>
+              }
             </Col>
             <Col>
               <Row>
@@ -173,10 +229,15 @@ function App() {
                   )}
                 </select>
               </Row>
+              {invalidNet &&
+              <div className='error-msg'>
+                Error
+              </div>
+              }
             </Col>
             <div className="col submit-align">
                 <input type="submit"
-                       value="Obtener cajeros" 
+                       value="Buscar cajeros" 
                        className="submit-btn"/>
             </div>
           </Row>
@@ -196,6 +257,15 @@ function App() {
                   <span className="available-atms">Cajeros Disponibles</span>
                 </div>
                 <AtmsInfo atm={atm} className="info-card-container"/>
+              </div>}
+              {noAtmsWereFound &&
+              <div className='info-error-container'>
+                <div className="atms-title">
+                  <span className="unavailable-atm">No Hay Cajeros Disponibles</span>
+                </div>
+                <div className="info-card-container">
+                  <p>Lo sentimos, no hay cajeros disponibles cerca de su posición</p>
+                </div>
               </div>}
             </Col>
           </Row>

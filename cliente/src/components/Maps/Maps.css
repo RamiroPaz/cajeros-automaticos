@@ -1,3 +1,13 @@
 .icon {
     z-index: 2;
 }
+
+.info-popup {
+    font-size: large;
+    position: absolute;
+    z-index: 10;
+}
+
+.atm-marker {
+    position: relative;
+}
