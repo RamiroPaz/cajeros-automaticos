@@ -1,0 +1,17 @@
+.info-card {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2rem;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background-color: darkgoldenrod;
+    border-radius: 15px;
+}
+
+.property {
+    font-weight: 400;
+}
+
+.value {
+    font-weight: lighter;
+}
