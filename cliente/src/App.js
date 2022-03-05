@@ -1,7 +1,7 @@
 import './App.css'
 import Maps from './components/Maps/Maps'
 import AtmsInfo from './components/AtmsInfo/AtmsInfo'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Container, Row, Col, Navbar } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -12,9 +12,23 @@ function App() {
   const [map, showMap] = useState(false)
   const [atm, setAtm] = useState({})
   const [atmsWereFound, setAtmsWereFound] = useState(false)
-  const [currentNetwork, setNetwork] = useState('Banelco')
-  const [currentLatitude, setLatitude] = useState(0)
-  const [currentLongitude, setLongitude] = useState(0)
+  const [currentNetwork, setNetwork] = useState(null)
+  const [networkOptions, setNetworkOptions] = useState(null)
+  const [currentLatitude, setLatitude] = useState(null)
+  const [currentLongitude, setLongitude] = useState(null)
+
+  useEffect( () => {
+    axios.get('http://localhost:5000/api/cajeros/redes')
+      .then(res => {
+        const options = JSON.parse(res.data.response)
+        setNetworkOptions(options)
+        setNetwork(options[0])
+      }).catch(err => {
+        console.log(err)
+      })
+    
+    getLocation()
+  },[])
 
   const getLocation = () => {
     var options = {
@@ -32,7 +46,8 @@ function App() {
       console.log(`More or less ${coords.accuracy} meters.`);
       setLatitude(coords.latitude)
       setLongitude(coords.longitude)
-
+      document.getElementById('latitude').value = coords.latitude
+      document.getElementById('longitude').value = coords.longitude
     }
 
     function error(err) {
@@ -43,9 +58,15 @@ function App() {
   }
 
   const getAtms = (event) => {
-    event.preventDefault()
+    if(event){
+      event.preventDefault()
+    }
 
-    if(currentLatitude == 0 || currentLongitude == 0){
+    if(!currentLatitude || !currentLongitude || !currentNetwork){
+      console.log(currentLatitude)
+      console.log(currentLongitude)
+      console.log(currentNetwork)
+      console.log('invalid input')
       return false
     }
 
@@ -95,13 +116,22 @@ function App() {
     setLongitude(Number(input))
   }
 
+  const handleSelect = (event) => {
+    const input = event.target.value
+    if(!input || input === ''){
+      console.log('invalid network')
+      return
+    }
+    setNetwork(input)
+  }
+
   return (
     <div>
       <Navbar bg="dark" variant="dark">
         <Container>
           <Navbar.Brand href="#home">
           <FontAwesomeIcon icon={faMoneyBillWave}/>
-          Buscar Cajeros
+            <span className='nav-title'>Buscar Cajeros</span>
           </Navbar.Brand>
         </Container>
       </Navbar>
@@ -116,6 +146,7 @@ function App() {
               </Row>
               <input type="textbox"
                 step="any"
+                id="latitude"
                 onChange={handleLatitude}
                 placeholder="Ingrese su latitud" />
             </Col>
@@ -127,13 +158,23 @@ function App() {
               </Row>
               <input type="textbox"
                 step="0.1"
+                id="longitude"
                 onChange={handleLongitude}
                 placeholder="Ingrese su longitud" />
             </Col>
             <Col>
-              Red de Cajero
+              <Row>
+                Red de Cajero
+              </Row>
+              <Row>
+                <select onChange={handleSelect}>
+                  {networkOptions && networkOptions.map((n, index) =>
+                    <option key={index} value={n}>{n}</option> 
+                  )}
+                </select>
+              </Row>
             </Col>
-            <div class="col submit-align">
+            <div className="col submit-align">
                 <input type="submit"
                        value="Obtener cajeros" 
                        className="submit-btn"/>
