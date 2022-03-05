@@ -244,12 +244,12 @@ function App() {
         </form>
         <div className="map-section">
           <Row>
+            {map && 
             <Col xl={9} lg={8} md={7} sm={12} className="map">
-              {map &&
-                <Maps atm={atm}
-                  currentLatitude={currentLatitude}
-                  currentLongitude={currentLongitude} />}
-            </Col>
+              <Maps atm={atm}
+                currentLatitude={currentLatitude}
+                currentLongitude={currentLongitude} />
+            </Col>}
             <Col xl={3} lg={4} md={5} sm={12}>
               {atmsWereFound &&
               <div className='info-container'>

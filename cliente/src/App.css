@@ -6,6 +6,9 @@
     background-color: darkcyan;
     padding: 1rem;
     border-radius: 20px;
+    animation: fadeInAnimation ease 2.5s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
 }
 
 .info-error-container {
@@ -13,6 +16,9 @@
     padding: 1rem;
     border-radius: 20px;
     height: 100%;
+    animation: fadeInAnimation ease 2.5s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
 }
 
 .info-card-container {
@@ -25,14 +31,34 @@
     padding: 1rem;
     background-color: rgb(12, 90, 90);
     border-radius: 15px;
+    animation: fadeInAnimation ease 2.5s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fadeInAnimation {
+    0% {
+        transform: translateX(-50px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0px);
+        opacity: 1;
+    }
 }
 
 .submit-btn {
-    background-color: darkgoldenrod;
+    background-color: #b8860b;
     border: none;
     border-radius: 5px;
     color: white;
     padding: 5px 30px;
+    transition-duration: 0.4s;
+}
+
+.submit-btn:hover {
+    background-color: #f6cd65;
+    color: black;
 }
 
 .submit-align {
@@ -43,12 +69,16 @@
 
 .map {
     min-height: 50vh;
+    animation: fadeInAnimation ease 2.5s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
 }
 
 .map-section {
     margin-bottom: 2rem;
     margin-top: 2rem;
-}
+} 
+
 
 .atms-title {
     text-align: center;
