@@ -1,40 +1,24 @@
 import { Map, Marker } from "pigeon-maps"
-// import { useState } from 'react'
 import './Maps.css'
 
-function Maps({atm, currentLatitude, currentLongitude}) {
-    const color = `hsl(96deg 86% 35%)`
-    const color2 = `hsl(61deg 86% 35%)`
-    
-    // const [click, setClick] = useState(false)
-    
-
-    const atmClick = (index) => {
-        console.log(atm[index])
-        // tooltip(atm[index].banco)
-        // setClick(!click)
-    }
-
-    // const tooltip = (info) => {
-    //     <div className="info-popup">
-    //         {info}
-    //     </div>
-    // }
+function Maps({atm, currentLatitude, currentLongitude, atmClicked, setAtmClicked}) {
+    const teal = `hsl(179, 57%, 34%)`
+    const salmon = `hsl(15, 52%, 57%)`
+    const yellow = `hsl(43, 89%, 68%)`
 
     const atmMarker =  atm.map((a, index) => 
         <Marker key={index} 
                 width={50} 
                 anchor={[Number(a.latitude), Number(a.longitude)]} 
-                color={color2}
+                color={index == atmClicked ? yellow :  salmon}
                 className="atm-marker"
-                onClick={() => atmClick(index)}/>
+                onClick={() => setAtmClicked(index)}/>
     )
 
     return (
         <Map defaultCenter={[currentLatitude, currentLongitude]} defaultZoom={15}>
-            <Marker className="icon" width={60} anchor={[currentLatitude, currentLongitude]} color={color}/>
+            <Marker className="icon" width={60} anchor={[currentLatitude, currentLongitude]} color={teal}/>
             {atmMarker}
-            {/* {click && tooltip()} */}
         </Map>
     )
 }

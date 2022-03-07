@@ -4,7 +4,7 @@
     margin-bottom: 2rem;
     margin-top: 1rem;
     padding: 0.5rem;
-    background-color: darkgoldenrod;
+    background-color: #ca7558;
     border-radius: 15px;
     transition-duration: 0.4s;
 }
@@ -12,6 +12,18 @@
 .info-card:hover {
     background-color: #f6cd65;
     color: black;
+}
+
+.info-card-click {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2rem;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background-color: #f6cd65;
+    color: black;
+    border-radius: 15px;
+    transition-duration: 0.4s;
 }
 
 .property {

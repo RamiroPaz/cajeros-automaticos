@@ -1,25 +1,16 @@
 import './AtmsInfo.css'
 
-function AtmsInfo({atm}) {
-
-    // const atmItems = atm.map(a => 
-    //     <div>
-    //         <span>Banco: {a.banco}</span>
-    //         <span>Direccion: {a.direccion}</span>
-    //         <span>Latitude: {a.latitude}</span>
-    //         <span>Longitude: {a.longitude}</span>
-    //     </div>
-    // )
+function AtmsInfo({atm, atmClicked, setAtmClicked}) {
 
     return (
         atm.map((a, index )=> 
-            <div key={index} className="info-card">
+            <div key={index} className={index == atmClicked ? "info-card-click" : "info-card"} onClick={() => setAtmClicked(index)}>
                 <div>
-                    <span className="property">Banco:</span> 
+                    <span className="property">Banco:</span>
                     <span className="value"> {a.banco} </span>
                 </div>
                 <div>
-                    <span className="property">Direccion:</span> 
+                    <span className="property">Direccion:</span>
                     <span className="value"> {a.direccion}</span>
                 </div>
                 <div>
