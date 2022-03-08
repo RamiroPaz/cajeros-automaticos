@@ -12,16 +12,18 @@ function App() {
   const [map, showMap] = useState(false)
   const [atm, setAtm] = useState({})
   const [atmsWereFound, setAtmsWereFound] = useState(false)
-  const [noAtmsWereFound, setNoAtmsWereFound] = useState(false)
-  const [currentLatitude, setLatitude] = useState(null)
-  const [currentLongitude, setLongitude] = useState(null)
+  const [hasStarted, setHasStarted] = useState(false)
   const [atmClicked, setAtmClicked] = useState(null)
+  const [formData, setFormData] = useState({
+    latitude: null,
+    longitude: null
+  })
 
   return (
     <div>
       <Navbar bg="dark" variant="dark">
         <Container>
-          <Navbar.Brand href="#home">
+          <Navbar.Brand href="/">
           <FontAwesomeIcon icon={faMoneyBillWave}/>
             <span className='nav-title'>Buscar Cajeros</span>
           </Navbar.Brand>
@@ -31,23 +33,21 @@ function App() {
         <FormComponent showMap={showMap} 
                        setAtm={setAtm} 
                        setAtmsWereFound={setAtmsWereFound}
-                       setNoAtmsWereFound={setNoAtmsWereFound}
-                       setLatitude={setLatitude}
-                       currentLatitude={currentLatitude}
-                       currentLongitude={currentLongitude}
-                       setLongitude={setLongitude}/>
+                       setHasStarted={setHasStarted}
+                       setFormData={setFormData}
+                       formData={formData}/>
         <div className="map-section">
           <Row>
             {map && 
             <Col xl={9} lg={8} md={7} sm={12} className="map">
               <Maps atm={atm}
-                currentLatitude={currentLatitude}
-                currentLongitude={currentLongitude}
+                latitude={formData.latitude}
+                longitude={formData.longitude}
                 atmClicked={atmClicked}
                 setAtmClicked={setAtmClicked} />
             </Col>}
             <Col xl={3} lg={4} md={5} sm={12}>
-              {atmsWereFound &&
+              {hasStarted && atmsWereFound &&
               <div className='info-container'>
                 <div className="atms-title">
                   <span className="available-atms">Cajeros Disponibles</span>
@@ -57,7 +57,7 @@ function App() {
                           setAtmClicked={setAtmClicked}
                           className="info-card-container"/>
               </div>}
-              {noAtmsWereFound &&
+              {hasStarted && !atmsWereFound &&
               <div className='info-error-container'>
                 <div className="atms-title">
                   <span className="unavailable-atm">No Hay Cajeros Disponibles</span>

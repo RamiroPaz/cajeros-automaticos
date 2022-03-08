@@ -1,0 +1,14 @@
+.input {
+    width:80%;
+}
+
+.recaptcha {
+    transform:scale(0.80);
+    -webkit-transform:scale(0.80);
+    display: flex;
+    justify-content: center;
+}
+
+.recaptcha-error {
+    text-align: center;
+}

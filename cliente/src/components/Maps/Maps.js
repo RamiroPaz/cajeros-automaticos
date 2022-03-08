@@ -1,7 +1,7 @@
 import { Map, Marker } from "pigeon-maps"
 import './Maps.css'
 
-function Maps({atm, currentLatitude, currentLongitude, atmClicked, setAtmClicked}) {
+function Maps({atm, latitude, longitude, atmClicked, setAtmClicked}) {
     const teal = `hsl(179, 57%, 34%)`
     const salmon = `hsl(15, 52%, 57%)`
     const yellow = `hsl(43, 89%, 68%)`
@@ -16,8 +16,8 @@ function Maps({atm, currentLatitude, currentLongitude, atmClicked, setAtmClicked
     )
 
     return (
-        <Map defaultCenter={[currentLatitude, currentLongitude]} defaultZoom={15}>
-            <Marker className="icon" width={60} anchor={[currentLatitude, currentLongitude]} color={teal}/>
+        <Map defaultCenter={[latitude, longitude]} defaultZoom={15}>
+            <Marker className="icon" width={60} anchor={[latitude, longitude]} color={teal}/>
             {atmMarker}
         </Map>
     )

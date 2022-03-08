@@ -1,25 +1,28 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Row, Col } from 'react-bootstrap'
+import ReCAPTCHA from "react-google-recaptcha";
+import './FormComponent.css'
 
 function FormComponent({showMap, 
                         setAtm, 
                         setAtmsWereFound, 
-                        setNoAtmsWereFound, 
-                        setLatitude,
-                        currentLatitude,
-                        setLongitude,
-                        currentLongitude}) {
-  // const [atm, setAtm] = useState({})
+                        setHasStarted,
+                        setFormData,
+                        formData}) {
+
   const [currentNetwork, setNetwork] = useState(null)
+  const [recaptcha, setRecaptcha] = useState(false)
+  const [invalidRecaptcha, setInvalidRecaptcha] = useState(false)
   const [networkOptions, setNetworkOptions] = useState(null)
-  // const [currentLatitude, setLatitude] = useState(null)
-  // const [currentLongitude, setLongitude] = useState(null) 
-  const [invalidLatitude, setInvalidLatitude] = useState(false) //
-  const [invalidLongitude, setInvalidLongitude] = useState(false) //
-  const [invalidNet, setInvalidNet] = useState(false) //
+  const [invalid, setInvalid] = useState({
+    latitude:false,
+    longitude:false
+  })
+  const [invalidNet, setInvalidNet] = useState(false)
 
   useEffect( () => {
+    // http request to get the available ATM networks
     axios.get('http://localhost:5000/api/cajeros/redes')
       .then(res => {
         const options = JSON.parse(res.data.response)
@@ -28,26 +31,25 @@ function FormComponent({showMap,
       }).catch(err => {
         console.log(err)
       })
-    
+    // asks the user for permission to access their location
     getLocation()
   },[])
 
   const getLocation = () => {
-    var options = {
+    let options = {
       enableHighAccuracy: true,
       timeout: 5000,
       maximumAge: 0
     };
 
     function success(pos) {
-      var coords = pos.coords;
-
-      console.log('Your current position is:');
-      console.log(`Latitude : ${coords.latitude}`);
-      console.log(`Longitude: ${coords.longitude}`);
-      console.log(`More or less ${coords.accuracy} meters.`);
-      setLatitude(coords.latitude)
-      setLongitude(coords.longitude)
+      let coords = pos.coords;
+      // setting the hooks and the form values
+      setFormData({
+        ...formData,
+        latitude: coords.latitude,
+        longitude: coords.longitude
+      })
       document.getElementById('latitude').value = coords.latitude
       document.getElementById('longitude').value = coords.longitude
     }
@@ -59,99 +61,128 @@ function FormComponent({showMap,
     navigator.geolocation.getCurrentPosition(success, error, options);
   }
 
+  // http request to get the nearest atms
   const getAtms = (event) => {
     if(event){
       event.preventDefault()
     }
 
-    console.log('latitud ' + currentLatitude)
-    console.log('longitud ' + currentLongitude)
-
-    if(invalidLatitude || invalidLongitude || invalidNet) {
+    // validations
+    if(invalid.latitude || invalid.longitude || invalidNet) {
       return false
     }
 
-    if(currentLatitude == '-'){
-      setInvalidLatitude(true)
-      setLatitude(0)
-      console.log('invalid input')
-      return false
-    }
-    if(currentLongitude == '-'){
-      setInvalidLongitude(true)
-      setLongitude(0)
+    if(formData.latitude === null){
+      setInvalid({
+        ...invalid,
+        latitude:true
+      })
       return false
     }
 
-    const coord = `${currentLatitude}, ${currentLongitude}`
-    const network = `${currentNetwork}`
+    if(formData.longitude === null){
+      setInvalid({
+        ...invalid,
+        longitude:true
+      })
+      return false
+    }
 
-    axios.post('http://localhost:5000/api/cajeros', { coord, network })
+    if(formData.latitude === '-'){
+      setInvalid({
+        ...invalid,
+        latitude:true
+      })
+      setFormData({
+        ...formData,
+        latitude: 0
+      })
+      console.log(formData)
+      return false
+    }
+    if(formData.longitude === '-'){
+      setInvalid({
+        ...invalid,
+        longitude:true
+      })
+      setFormData({
+        ...formData,
+        longitude: 0
+      })
+      console.log(formData)
+      return false
+    }
+
+    if(!recaptcha){
+      setInvalidRecaptcha(true)
+      return false
+    }
+
+    const latitude = formData.latitude
+    const longitude = formData.longitude
+    const network = currentNetwork
+
+    axios.post('http://localhost:5000/api/cajeros', { latitude, longitude, network })
       .then(res => {
         setAtm(res.data.response)
         showMap(true)
+        setHasStarted(true)
         if(res.data.response.length > 0) {
-          setNoAtmsWereFound(false)
           setAtmsWereFound(true)
         }else {
           setAtmsWereFound(false)
-          setNoAtmsWereFound(true)
         }
       }).catch(err => {
         console.log(err)
       })
   }
 
-
   const isValidCoord = (num) => {
     return isFinite(num) && Math.abs(num) <= 90
   }
 
-  const handleLatitude = (event) => {
-    const input = event.target.value
-    if(input == '') {
-      setLatitude(null)
-      setInvalidLatitude(true)
+  // validates user input
+  const handleCoord = (event) => {
+    const { name, value } = event.target
+
+    if(value === '') {
+      setFormData({
+        ...formData,
+        [name]: null
+      })
+      setInvalid({
+        ...invalid,
+        [name]: true
+      })
       return
     }
-    else if(input == '-') {
-      setLatitude(null)
-      return
-    } 
-    else if(isNaN(input)){
-      event.target.value = currentLatitude
-      return
-    }else if(!isValidCoord(input)){
-      event.target.value = currentLatitude
+    // the minus character is valid but not a number
+    else if(value === '-') {
+      setFormData({
+        ...formData,
+        [name]: null
+      })
       return
     }
-    setInvalidLatitude(false)
-    setLatitude(Number(input))
+    // prevents the user to write invalid characters
+    else if(isNaN(value)){
+      event.target.value = formData.latitude
+      return
+    }else if(!isValidCoord(value)){
+      event.target.value = formData.latitude
+      return
+    }
+    setInvalid({
+      ...invalid,
+      [name]: false
+    })
+    setFormData({
+      ...formData,
+      [name]: Number(value)
+    })
   }
 
-  const handleLongitude = (event) => {
-    const input = event.target.value
-    console.log(input)
-    if(input == '') {
-      setLongitude(null)
-      setInvalidLongitude(true)
-      return
-    }
-    if(input == '-') {
-      setLongitude(null)
-      return
-    } 
-    else if(isNaN(input)){
-      event.target.value = currentLongitude
-      return
-    }else if(!isValidCoord(input)){
-      event.target.value = currentLongitude
-      return
-    }
-    setInvalidLongitude(false)
-    setLongitude(Number(input))
-  }
-
+  // validates user input
   const handleSelect = (event) => {
     const input = event.target.value
     if(!input || input === ''){
@@ -163,10 +194,15 @@ function FormComponent({showMap,
     setNetwork(input)
   }
 
+  const handleCaptcha = () => {
+    setRecaptcha(true)
+    setInvalidRecaptcha(false)
+  }
+
   return(
     <form onSubmit={getAtms} className="form">
       <Row>
-        <Col>
+        <Col xl={2} lg={6} md={12}>
           <Row>
             <label>
               Latitud
@@ -176,16 +212,18 @@ function FormComponent({showMap,
             <input type="textbox"
               step="any"
               id="latitude"
-              onChange={handleLatitude}
-              placeholder="Ingrese su latitud" />
+              name="latitude"
+              onChange={handleCoord}
+              placeholder="Ingrese su latitud" 
+              className="input" />
           
-          {invalidLatitude &&
+          {invalid.latitude &&
           <div className='error-msg'>
             Latitud Invalida
           </div>
           }
         </Col>
-        <Col>
+        <Col xl={2} lg={6} md={12}>
           <Row>
             <label>
               Longitud
@@ -195,33 +233,52 @@ function FormComponent({showMap,
             <input type="textbox"
               step="0.1"
               id="longitude"
-              onChange={handleLongitude}
-              placeholder="Ingrese su longitud" />
+              name="longitude"
+              onChange={handleCoord}
+              placeholder="Ingrese su longitud"
+              className="input" />
           
-          {invalidLongitude &&
+          {invalid.longitude &&
           <div className='error-msg'>
             Longitud Invalida
           </div>
           }
         </Col>
-        <Col>
+        <Col xl={2} lg={6} md={12}>
           <Row>
-            Red de Cajero
+            <label>
+              Red de Cajero
+            </label>
           </Row>
-          <Row>
-            <select onChange={handleSelect}>
+ 
+            <select onChange={handleSelect} className="input">
               {networkOptions && networkOptions.map((n, index) =>
                 <option key={index} value={n}>{n}</option> 
               )}
             </select>
-          </Row>
+
           {invalidNet &&
           <div className='error-msg'>
             Error
           </div>
           }
         </Col>
-        <div className="col submit-align">
+        <Col xl={3} lg={6} md={12}>
+          <Row>
+            <div className='recaptcha'>  
+              <ReCAPTCHA
+                sitekey="6Lei18AeAAAAAKIg9fnMFVS7wnVb5AI0TMVaHncn"
+                onChange={handleCaptcha}
+              />
+            </div>
+          </Row>
+          {invalidRecaptcha &&
+          <div className='error-msg recaptcha-error'>
+            Completa el ReCAPTCHA
+          </div>
+          }
+        </Col>
+        <div className="col-xl-3 col-lg-12 col-md-12 submit-align">
             <input type="submit"
                     value="Buscar cajeros" 
                     className="submit-btn"/>
