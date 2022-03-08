@@ -12,3 +12,23 @@
 .recaptcha-error {
     text-align: center;
 }
+
+.submit-btn {
+    background-color: #ca7558;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 5px 30px;
+    transition-duration: 0.4s;
+}
+
+.submit-btn:hover {
+    background-color: #f6cd65;
+    color: black;
+}
+
+.submit-align {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
