@@ -194,9 +194,13 @@ function FormComponent({showMap,
     setNetwork(input)
   }
 
-  const handleCaptcha = () => {
-    setRecaptcha(true)
-    setInvalidRecaptcha(false)
+  const handleCaptcha = (res) => {
+    if(res) {
+      setRecaptcha(true)
+      setInvalidRecaptcha(false)
+    }else{
+      setRecaptcha(false)
+    }
   }
 
   return(
